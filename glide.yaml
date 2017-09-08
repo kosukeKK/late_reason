@@ -1,0 +1,6 @@
+package: go_sample/late_reason
+import:
+- package: github.com/jinzhu/gorm
+  version: v1.0
+  subpackages:
+  - dialects/postgres
