@@ -7,18 +7,26 @@ import (
 	"math/rand"
 	mds "github.com/kiji/late_reason/models"
 	dbInfo "github.com/kiji/late_reason/db"
+	"os/exec"
+	"fmt"
+	"reflect"
 )
 
 var db *gorm.DB
 func Handler(c *gin.Context) {
-	db = dbInfo.DBconnect()
-	defer db.Close()
 	var (
 		reason = []mds.LateReason{}
 		jsonMap map[string]interface{} = make(map[string]interface{})
 		count = 0
 	)
+	db = dbInfo.DBconnect()
+	defer db.Close()
 	db.Find(&reason).Count(&count)
-	jsonMap["reason"] = reason[rand.Intn(count)].Text
+	text := reason[rand.Intn(count)].Text
+	err := exec.Command("curl", "-X", "POST", "--data-urlencode", "payload={\"text\": \"" + text + "\"}", "web hook api").Run()
+	if err != nil {
+		fmt.Println(err)
+	}
+	jsonMap["reason"] = text
 	c.JSON(200, jsonMap)
 }
